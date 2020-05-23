@@ -32,7 +32,7 @@ impl ProducerProcessor<Counter> for Count {
         if value < 100 {
             None
         } else {
-            println!("Stopping processor");
+            println!("Interrupting producer");
             Some(ProducerControl::Stop)
         }
     }

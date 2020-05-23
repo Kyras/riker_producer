@@ -11,4 +11,7 @@ crossbeam = "0.7"
 riker = "0.4"
 
 [[example]]
-name = "counter"
+name = "interrupted"
+
+[[example]]
+name = "exhausted"
