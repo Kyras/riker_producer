@@ -59,20 +59,25 @@ impl<T: ProducerBehaviour + Sync + Send + 'static, U: ProducerProcessor<T> + Syn
                 let ctrl_chan = rx;
                 let mut producer = producer;
                 let actor_ref = self_ref;
-                loop {
-                    match ctrl_chan.try_recv() {
-                        Ok(_) | Err(TryRecvError::Disconnected) => {
-                            return producer;
-                        }
-                        Err(TryRecvError::Empty) => {
-                            let product = producer.produce();
-                            let is_completed = product.is_completed();
-                            actor_ref.send_msg(product, actor_ref.clone());
-                            if is_completed {
+                if producer.pre_start() {
+                    loop {
+                        match ctrl_chan.try_recv() {
+                            Ok(_) | Err(TryRecvError::Disconnected) => {
                                 return producer;
+                            }
+                            Err(TryRecvError::Empty) => {
+                                let product = producer.produce();
+                                let is_completed = product.is_completed();
+                                actor_ref.send_msg(product, actor_ref.clone());
+                                if is_completed {
+                                    producer.post_stop();
+                                    return producer;
+                                }
                             }
                         }
                     }
+                } else {
+                    return producer;
                 }
             });
             self.ctrl_channel = Some(tx);

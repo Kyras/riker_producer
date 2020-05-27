@@ -5,7 +5,9 @@ pub trait ProducerBehaviour {
     type Product: Producible;
     type Completed: Producible;
 
+    fn pre_start(&mut self) -> bool { true }
     fn produce(&mut self) -> ProducerOutput<Self::Product, Self::Completed>;
+    fn post_stop(&mut self) {}
 }
 
 pub trait ProducerBehaviourFactoryArgs<Args: ActorArgs>: ProducerBehaviour {
