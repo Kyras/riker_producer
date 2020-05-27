@@ -51,6 +51,7 @@ impl<T: ProducerBehaviour + Sync + Send + 'static, U: ProducerProcessor<T> + Syn
     type Msg = ProducerOutput<T::Product, T::Completed>;
 
     fn pre_start(&mut self, ctx: &Context<Self::Msg>) {
+        self.processor.pre_start(&ctx);
         let producer = std::mem::take(&mut self.producer);
         if let Some(producer) = producer {
             let self_ref = ctx.myself();
@@ -83,6 +84,10 @@ impl<T: ProducerBehaviour + Sync + Send + 'static, U: ProducerProcessor<T> + Syn
             self.ctrl_channel = Some(tx);
             self.handle = Some(handle);
         }
+    }
+
+    fn post_start(&mut self, ctx: &Context<Self::Msg>) {
+        self.processor.post_start(ctx);
     }
 
     fn post_stop(&mut self) {
